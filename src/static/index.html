@@ -7,12 +7,70 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <!-- User Login Button -->
+    <div class="user-icon" id="userIcon" title="Teacher Login">👨‍🏫</div>
+
+    <!-- Login Modal -->
+    <div class="login-modal" id="loginModal">
+      <div class="login-content">
+        <h2>Teacher Login</h2>
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" id="username" required placeholder="Enter your username" />
+          </div>
+          <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" required placeholder="Enter your password" />
+          </div>
+          <button type="submit">Login</button>
+          <button type="button" class="secondary" id="closeLoginBtn" style="margin-top: 10px;">Cancel</button>
+        </form>
+        <div id="loginMessage" class="message hidden" style="margin-top: 15px;"></div>
+      </div>
+    </div>
+
     <header>
       <h1>Mergington High School</h1>
       <h2>Extracurricular Activities</h2>
     </header>
 
-    <main>
+    <main class="container">
+      <!-- Filters Section -->
+      <section id="filters-section">
+        <h3>Filter & Search</h3>
+        
+        <div class="form-group">
+          <label for="categoryFilter">Category:</label>
+          <select id="categoryFilter">
+            <option value="">All Categories</option>
+            <option value="STEM">STEM</option>
+            <option value="Sports">Sports</option>
+            <option value="Arts & Culture">Arts & Culture</option>
+            <option value="Strategy & Games">Strategy & Games</option>
+            <option value="Public Speaking">Public Speaking</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="sortBy">Sort By:</label>
+          <select id="sortBy">
+            <option value="name">Name (A-Z)</option>
+            <option value="name-desc">Name (Z-A)</option>
+            <option value="availability">Most Available</option>
+            <option value="availability-desc">Least Available</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="searchInput">Search:</label>
+          <input type="text" id="searchInput" placeholder="Search activities..." />
+        </div>
+
+        <button id="resetFilters" class="secondary" style="width: 100%; margin-top: 10px;">Reset Filters</button>
+      </section>
+
+      <!-- Activities Section -->
       <section id="activities-container">
         <h3>Available Activities</h3>
         <div id="activities-list">
@@ -20,29 +78,30 @@
           <p>Loading activities...</p>
         </div>
       </section>
-
-      <section id="signup-container">
-        <h3>Sign Up for an Activity</h3>
-        <form id="signup-form">
-          <div class="form-group">
-            <label for="email">Student Email:</label>
-            <input type="email" id="email" required placeholder="your-email@mergington.edu" />
-          </div>
-          <div class="form-group">
-            <label for="activity">Select Activity:</label>
-            <select id="activity" required>
-              <option value="">-- Select an activity --</option>
-              <!-- Activity options will be loaded here -->
-            </select>
-          </div>
-          <button type="submit">Sign Up</button>
-        </form>
-        <div id="message" class="hidden"></div>
-      </section>
     </main>
 
+    <!-- Signup Section (moved to bottom) -->
+    <section id="signup-section" class="container" style="max-width: 500px; margin: 40px auto;">
+      <h3>Sign Up for an Activity</h3>
+      <form id="signup-form">
+        <div class="form-group">
+          <label for="email">Student Email:</label>
+          <input type="email" id="email" required placeholder="your-email@mergington.edu" />
+        </div>
+        <div class="form-group">
+          <label for="activity">Select Activity:</label>
+          <select id="activity" required>
+            <option value="">-- Select an activity --</option>
+            <!-- Activity options will be loaded here -->
+          </select>
+        </div>
+        <button type="submit">Sign Up</button>
+      </form>
+      <div id="message" class="hidden" style="margin-top: 15px;"></div>
+    </section>
+
     <footer>
-      <p>&copy; 2026 Mergington High School</p>
+      <p>&copy; 2026 Mergington High School • All rights reserved</p>
     </footer>
 
     <script src="app.js"></script>
