@@ -1,18 +1,25 @@
-name: Step 3
+name: Step 3 and 4
 
 on:
   workflow_dispatch:
   pull_request:
     branches:
       - main
+  issue_comment:
+    types: [created]
 
 permissions:
-  contents: read
+  contents: write
   actions: write
   issues: write
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
 env:
   STEP_4_FILE: ".github/steps/4-step.md"
+  REVIEW_FILE: ".github/steps/x-review.md"
 
 jobs:
   find_exercise:
@@ -21,10 +28,9 @@ jobs:
 
   check_step_work:
     name: Check step work
+    if: github.event_name != 'issue_comment'
     runs-on: ubuntu-latest
     needs: [find_exercise]
-    if: |
-      !github.event.repository.is_template
     env:
       ISSUE_REPOSITORY: ${{ github.repository }}
       ISSUE_NUMBER: ${{ needs.find_exercise.outputs.issue-number }}
@@ -70,13 +76,10 @@ jobs:
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
         run: |
-          # Show the list of all changed files
           echo "All changed files: ${ALL_CHANGED_FILES}"
 
-          # Initialize flag
           has_src_changed=false
 
-          # Check each changed file
           for file in ${ALL_CHANGED_FILES}; do
             if [[ $file == src/* ]]; then
               has_src_changed=true
@@ -84,7 +87,6 @@ jobs:
             fi
           done
 
-          # Set step message based on results
           if ! $has_src_changed; then
             echo "No changes found in src directory"
             echo "STEP_MESSAGE=Use Copilot to implement changes in the src directory" >> $GITHUB_OUTPUT
@@ -116,6 +118,7 @@ jobs:
 
   post_next_step_content:
     name: Post next step content
+    if: github.event_name != 'issue_comment'
     needs: [find_exercise, check_step_work]
     runs-on: ubuntu-latest
     env:
@@ -158,9 +161,50 @@ jobs:
           issue-number: ${{ env.ISSUE_NUMBER }}
           file: exercise-toolkit/markdown-templates/step-feedback/watching-for-progress.md
 
-      - name: Disable current workflow and enable next one
-        run: |
-          gh workflow disable "${{github.workflow}}"
-          gh workflow enable "Step 4"
+  post_review_content:
+    name: Post review content
+    if: github.event_name == 'issue_comment' && !github.event.repository.is_template
+    needs: [find_exercise]
+    runs-on: ubuntu-latest
+    env:
+      ISSUE_REPOSITORY: ${{ github.repository }}
+      ISSUE_NUMBER: ${{ needs.find_exercise.outputs.issue-number }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Get response templates
+        uses: actions/checkout@v5
+        with:
+          repository: skills/exercise-toolkit
+          path: exercise-toolkit
+          ref: v0.7.0
+
+      - name: Create comment - step finished - final review next
+        uses: GrantBirki/comment@v2.1.1
+        with:
+          repository: ${{ env.ISSUE_REPOSITORY }}
+          issue-number: ${{ env.ISSUE_NUMBER }}
+          file: exercise-toolkit/markdown-templates/step-feedback/lesson-review.md
+
+      - name: Create comment - add review content
+        uses: GrantBirki/comment@v2.1.1
+        with:
+          repository: ${{ env.ISSUE_REPOSITORY }}
+          issue-number: ${{ env.ISSUE_NUMBER }}
+          file: ${{ env.REVIEW_FILE }}
+
+      - name: Disable current workflow
+        run: gh workflow disable "${{github.workflow}}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  finish_exercise:
+    name: Finish Exercise
+    if: github.event_name == 'issue_comment'
+    needs: [find_exercise, post_review_content]
+    uses: skills/exercise-toolkit/.github/workflows/finish-exercise.yml@v0.7.1
+    with:
+      issue-url: ${{ needs.find_exercise.outputs.issue-url }}
+      exercise-title: "Integrate MCP with GitHub Copilot"
