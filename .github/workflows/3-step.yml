@@ -118,7 +118,6 @@ jobs:
 
   post_next_step_content:
     name: Post next step content
-    if: github.event_name != 'issue_comment'
     needs: [find_exercise, check_step_work]
     runs-on: ubuntu-latest
     env:
@@ -163,7 +162,6 @@ jobs:
 
   post_review_content:
     name: Post review content
-    if: github.event_name == 'issue_comment' && !github.event.repository.is_template
     needs: [find_exercise]
     runs-on: ubuntu-latest
     env:
@@ -202,7 +200,6 @@ jobs:
 
   finish_exercise:
     name: Finish Exercise
-    if: github.event_name == 'issue_comment'
     needs: [find_exercise, post_review_content]
     uses: skills/exercise-toolkit/.github/workflows/finish-exercise.yml@v0.7.1
     with:
