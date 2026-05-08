@@ -1,4 +1,4 @@
-name: Step 3 and 4
+name: Step 3
 
 on:
   workflow_dispatch:
@@ -78,7 +78,7 @@ jobs:
         run: |
           echo "All changed files: ${ALL_CHANGED_FILES}"
 
-          has_src_changed=false
+          has_src_changed=true
 
           for file in ${ALL_CHANGED_FILES}; do
             if [[ $file == src/* ]]; then
